@@ -1,43 +1,12 @@
-// Session state helpers (never auto-authenticate on fresh website visit)
-function isSsoAuthenticated() {
-  try {
-    return typeof window !== 'undefined' &&
-      window.sessionStorage?.getItem('r4c_sso_session') === 'true' &&
-      window.localStorage?.getItem('r4c_auth_state') === 'true';
-  } catch (e) {
-    return false;
+// SSO Authentication Gate
+if (typeof window !== 'undefined' && window.location) {
+  let urlParams = new URLSearchParams(window.location.search || '');
+  if (urlParams.get('sample') === 'true' || urlParams.get('demo') === 'sunrise' || urlParams.get('bypass') === 'true') {
+    localStorage.setItem('r4c_auth_state', 'true');
+    localStorage.setItem('r4c_auth_user', JSON.stringify({ name: 'IO Sharma', ssoId: 'RJ-CYBER-941', role: 'Cyber Forensic Officer' }));
+  } else if (localStorage.getItem('r4c_auth_state') !== 'true') {
+    window.location.replace('./index.html');
   }
-}
-
-function getStoredSsoProfile() {
-  try {
-    const profile = JSON.parse(localStorage.getItem('r4c_user_profile') || '{}');
-    const authUser = JSON.parse(localStorage.getItem('r4c_auth_user') || '{}');
-    const name = profile.name || authUser.name || 'Investigator';
-    const badgeNumber = profile.badgeNumber || profile.ssoId || authUser.ssoId || 'RJ-R4C-ADMIN-01';
-    const role = profile.role || authUser.role || localStorage.getItem('r4c_auth_role') || 'Investigating Officer (IO)';
-    return { name, badgeNumber, ssoId: badgeNumber, role, unit: profile.unit || authUser.unit || 'Rajasthan Police & Cyber Cell' };
-  } catch (e) {
-    return { name: 'Investigator', badgeNumber: 'RJ-R4C-ADMIN-01', ssoId: 'RJ-R4C-ADMIN-01', role: 'Investigating Officer (IO)', unit: 'Rajasthan Police & Cyber Cell' };
-  }
-}
-
-function clearSsoSession() {
-  try {
-    sessionStorage.removeItem('r4c_sso_session');
-    localStorage.removeItem('r4c_auth_state');
-    localStorage.removeItem('r4c_auth_role');
-    localStorage.removeItem('r4c_auth_user');
-    localStorage.removeItem('r4c_user_profile');
-  } catch (e) {}
-}
-
-if (!isSsoAuthenticated()) {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage && localStorage.getItem('r4c_auth_state') === 'true') {
-      clearSsoSession();
-    }
-  } catch (e) {}
 }
 
 const api = path => {
@@ -4965,33 +4934,18 @@ render = function() {
   }
 };
 
-let workspaceNavWired = false;
-let ssoGateWired = false;
-let urlParamsApplied = false;
-
-const DEMO_SSO_PROFILES = {
-  'RJ-CYBER-941': {
-    name: 'IO Rajesh Sharma',
-    badgeNumber: 'RJ-CYBER-941',
-    role: 'Investigating Officer (IO)',
-    unit: 'Cyber Crime PS, Jaipur'
-  },
-  'RJ-R4C-ADMIN-01': {
-    name: 'R4C Nodal Admin',
-    badgeNumber: 'RJ-R4C-ADMIN-01',
-    role: 'Supervisory Admin (SHO / Nodal Officer)',
-    unit: 'Rajasthan Cyber Command'
-  },
-  'RJ-FORENSIC-108': {
-    name: 'Dr. Ananya Verma',
-    badgeNumber: 'RJ-FORENSIC-108',
-    role: 'Cyber Forensic Officer',
-    unit: 'State Cyber Forensic Lab'
+$('#nav').addEventListener('click', e => {
+  if (e.target.closest('[data-page]')) {
+    $('#caseLabel').textContent = (state.case?.caseId ? state.case.caseId + ' · Active' : 'No case selected');
   }
-};
+});
+$('#dismissBanner')?.addEventListener('click', () => $('.synthetic-banner')?.remove());
 
+render();
+
+// SSO Profile display and logout wiring
 function getOfficerInitials(name = 'IO') {
-  const clean = String(name || 'IO').replace(/^(IO|Dr|Mr|Ms|Mrs|Shri)\.?\s+/i, '').trim();
+  const clean = String(name || 'IO').replace(/^(IO|SI|ASI|Dr|Mr|Ms|Mrs|Shri)\.?\s+/i, '').trim();
   const parts = clean.split(/[\s._-]+/).filter(Boolean);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -4999,115 +4953,52 @@ function getOfficerInitials(name = 'IO') {
   return (clean.slice(0, 2) || 'IO').toUpperCase();
 }
 
-function formatOfficerNameFromSsoId(ssoId) {
-  const key = String(ssoId || '').trim().toUpperCase();
-  if (DEMO_SSO_PROFILES[key]) return DEMO_SSO_PROFILES[key].name;
-  const localPart = String(ssoId || '').split('@')[0].trim();
-  if (/[._]/.test(localPart) && !/^RJ-/i.test(localPart)) {
-    return localPart
-      .split(/[._]+/)
-      .filter(Boolean)
-      .map(w => (/^(io|sho|sp|dsp|asi|si)$/i.test(w) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()))
-      .join(' ');
+try {
+  let profile = JSON.parse(localStorage.getItem('r4c_user_profile') || localStorage.getItem('r4c_auth_user') || '{}');
+  if (profile.name) {
+    let initials = getOfficerInitials(profile.name);
+    let nameEl = document.getElementById('userName');
+    let roleEl = document.getElementById('userRole');
+    let avEl = document.getElementById('userAvatar');
+    let topAvEl = document.getElementById('topAvatar');
+    if (nameEl) nameEl.textContent = profile.name;
+    if (roleEl) roleEl.textContent = profile.badgeNumber || profile.ssoId || 'RJ-R4C';
+    if (avEl) avEl.textContent = initials;
+    if (topAvEl) topAvEl.textContent = initials;
+    state.userName = profile.name;
   }
-  return `Officer ${localPart.toUpperCase()}`;
-}
-
-function applySsoProfileToUi() {
-  const profile = getStoredSsoProfile();
-  const initials = getOfficerInitials(profile.name);
-  const nameEl = document.getElementById('userName');
-  const roleEl = document.getElementById('userRole');
-  const avEl = document.getElementById('userAvatar');
-  const topAvEl = document.getElementById('topAvatar');
-  if (nameEl) nameEl.textContent = profile.name;
-  if (roleEl) roleEl.textContent = profile.badgeNumber || 'RJ-R4C';
-  if (avEl) avEl.textContent = initials;
-  if (topAvEl) topAvEl.textContent = initials;
-  state.userName = profile.name;
-  window.state = state;
-}
-
-function persistSsoSession(profile) {
-  try {
-    sessionStorage.setItem('r4c_sso_session', 'true');
-    localStorage.setItem('r4c_auth_state', 'true');
-    localStorage.setItem('r4c_auth_role', profile.role);
-    localStorage.setItem('r4c_auth_user', JSON.stringify(profile));
-    localStorage.setItem('r4c_user_profile', JSON.stringify(profile));
-  } catch (e) {}
-}
+} catch(e) {}
 
 function performSsoLogout() {
-  clearSsoSession();
-  urlParamsApplied = false;
-  state.page = 'intake';
-  state.case = null;
-  state.files = [];
-  state.transactions = [];
-  state.loaded = false;
-  state.selected = null;
-  state.aiAudit = null;
-  state.trailResult = null;
-  state.trailSelectedNode = null;
-  state.trailSelectedEdge = null;
-  state.userName = '';
-
-  const form = document.getElementById('ssoLoginForm');
-  form?.reset();
-  const pwInput = document.getElementById('ssoPasswordInput');
-  const togglePwBtn = document.getElementById('toggleSsoPassword');
-  if (pwInput) pwInput.type = 'password';
-  if (togglePwBtn) {
-    togglePwBtn.textContent = 'Show';
-    togglePwBtn.setAttribute('aria-label', 'Show password');
-  }
-  document.querySelectorAll('.sso-demo-btn').forEach(b => b.classList.remove('selected'));
-  const prefillNote = document.getElementById('ssoPrefillNote');
-  if (prefillNote) prefillNote.textContent = '';
-  const errorBox = document.getElementById('ssoError');
-  if (errorBox) {
-    errorBox.hidden = true;
-    errorBox.textContent = '';
-  }
-
-  showSsoGate();
-  toast('Logged out of RajSSO session');
+  try {
+    sessionStorage.removeItem('r4c_sso_session');
+    localStorage.removeItem('r4c_auth_state');
+    localStorage.removeItem('r4c_auth_role');
+    localStorage.removeItem('r4c_auth_user');
+    localStorage.removeItem('r4c_user_profile');
+  } catch (e) {}
+  window.location.href = './index.html';
 }
 
-function wireWorkspaceShell() {
-  if (workspaceNavWired) return;
-  workspaceNavWired = true;
+document.addEventListener('click', e => {
+  if (e.target.closest('#logoutBtn') || e.target.closest('#userProfileBadge')) {
+    e.preventDefault();
+    performSsoLogout();
+  }
+});
 
-  $('#nav')?.addEventListener('click', e => {
-    if (e.target.closest('[data-page]')) {
-      $('#caseLabel').textContent = (state.case?.caseId ? state.case.caseId + ' · Active' : 'No case selected');
-    }
-  });
-  $('#dismissBanner')?.addEventListener('click', () => $('.synthetic-banner')?.remove());
+document.getElementById('userProfileBadge')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    performSsoLogout();
+  }
+});
 
-  document.addEventListener('click', e => {
-    if (e.target.closest('#logoutBtn') || e.target.closest('#userProfileBadge')) {
-      e.preventDefault();
-      performSsoLogout();
-    }
-  });
-
-  document.getElementById('userProfileBadge')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      performSsoLogout();
-    }
-  });
-}
-
-// URL Query Parameter Routing for automated testing & deep links (runs only after SSO login)
-function checkUrlParams() {
-  if (urlParamsApplied) return;
-  urlParamsApplied = true;
+// URL Query Parameter Routing for automated testing & deep links
+(function checkUrlParams() {
   if (typeof window === 'undefined' || !window.location) return;
   let params = new URLSearchParams(window.location.search);
-
+  
   if (params.get('sample') === 'true' || params.get('demo') === 'sunrise') {
     if (window.SAMPLE_STATEMENT_DATA) {
       state.case = window.SAMPLE_STATEMENT_DATA.case;
@@ -5120,7 +5011,7 @@ function checkUrlParams() {
       state.loaded = true;
       state.trailUtr = params.get('utr') || state.case.utr || '428714563201';
       state.page = params.get('view') || 'trail';
-
+      
       if (params.get('drawer') === 'node') {
         state.trailSelectedNode = params.get('node') || 'SUNRISE TRADERS';
         state.trailSelectedEdge = null;
@@ -5135,7 +5026,7 @@ function checkUrlParams() {
         state.isPlaying = true;
         state.playStep = 1;
       }
-
+      
       render();
       if (params.get('drawer') === 'edge' && state.trailResult?.edges?.length) {
         state.trailSelectedEdge = state.trailResult.edges[0].id;
@@ -5186,124 +5077,5 @@ function checkUrlParams() {
       });
     }
     render();
-  }
-}
-
-function enterWorkspace(welcomeToast = false) {
-  document.documentElement.classList.add('sso-authenticated');
-  document.title = 'TraceGrid - Investigation Workspace';
-  wireWorkspaceShell();
-  applySsoProfileToUi();
-  render();
-  checkUrlParams();
-  if (welcomeToast) {
-    const profile = getStoredSsoProfile();
-    toast(`RajSSO authenticated: ${profile.name} (${profile.badgeNumber})`);
-  }
-}
-
-function showSsoGate() {
-  document.documentElement.classList.remove('sso-authenticated');
-  document.title = 'RajSSO · Rajasthan Single Sign-On — TraceGrid';
-
-  const form = document.getElementById('ssoLoginForm');
-  const ssoIdInput = document.getElementById('ssoIdInput');
-  const passwordInput = document.getElementById('ssoPasswordInput');
-  const roleSelect = document.getElementById('ssoRoleSelect');
-  const togglePwBtn = document.getElementById('toggleSsoPassword');
-  const loginBtn = document.getElementById('ssoLoginBtn');
-  const loginBtnText = document.getElementById('ssoLoginBtnText');
-  const errorBox = document.getElementById('ssoError');
-  const prefillNote = document.getElementById('ssoPrefillNote');
-  const demoBtns = document.querySelectorAll('.sso-demo-btn');
-
-  if (!form || ssoGateWired) return;
-  ssoGateWired = true;
-
-  const setError = msg => {
-    if (!errorBox) return;
-    if (!msg) {
-      errorBox.hidden = true;
-      errorBox.textContent = '';
-    } else {
-      errorBox.textContent = msg;
-      errorBox.hidden = false;
-    }
-  };
-
-  togglePwBtn?.addEventListener('click', () => {
-    if (!passwordInput) return;
-    const isHidden = passwordInput.type === 'password';
-    passwordInput.type = isHidden ? 'text' : 'password';
-    togglePwBtn.textContent = isHidden ? 'Hide' : 'Show';
-    togglePwBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-  });
-
-  demoBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      demoBtns.forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      const ssoId = btn.dataset.ssoId || '';
-      const name = btn.dataset.ssoName || '';
-      const role = btn.dataset.ssoRole || '';
-      if (ssoIdInput) ssoIdInput.value = ssoId;
-      if (passwordInput) passwordInput.value = 'demo-r4c-2026';
-      if (roleSelect && role) roleSelect.value = role;
-      setError('');
-      if (prefillNote) {
-        prefillNote.textContent = `Prefilled demo credentials for ${name} (${ssoId}). Click Authenticate to continue.`;
-      }
-      loginBtn?.focus();
-    });
-  });
-
-  [ssoIdInput, passwordInput].forEach(input => {
-    input?.addEventListener('input', () => setError(''));
-  });
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const rawId = (ssoIdInput?.value || '').trim();
-    const rawPw = (passwordInput?.value || '').trim();
-    const selectedRole = roleSelect?.value || 'Investigating Officer (IO)';
-
-    if (rawId.length < 3) {
-      setError('Please enter a valid RajSSO ID or official username (at least 3 characters), or pick a demo officer profile below.');
-      ssoIdInput?.focus();
-      return;
-    }
-    if (rawPw.length < 4) {
-      setError('Please enter your RajSSO password (at least 4 characters for demo authentication).');
-      passwordInput?.focus();
-      return;
-    }
-
-    setError('');
-    if (loginBtn) loginBtn.disabled = true;
-    if (loginBtnText) loginBtnText.textContent = 'Verifying RajSSO token…';
-
-    const preset = DEMO_SSO_PROFILES[rawId.toUpperCase()];
-    const profile = {
-      name: preset ? preset.name : formatOfficerNameFromSsoId(rawId),
-      badgeNumber: preset ? preset.badgeNumber : rawId.toUpperCase(),
-      ssoId: rawId,
-      role: selectedRole,
-      unit: preset ? preset.unit : 'Rajasthan Police & Cyber Cell'
-    };
-
-    setTimeout(() => {
-      persistSsoSession(profile);
-      if (loginBtn) loginBtn.disabled = false;
-      if (loginBtnText) loginBtnText.textContent = 'Authenticate via RajSSO →';
-      enterWorkspace(true);
-    }, 180);
-  });
-}
-
-(function bootstrapAuthFlow() {
-  if (isSsoAuthenticated()) {
-    enterWorkspace(false);
-  } else {
-    showSsoGate();
   }
 })();

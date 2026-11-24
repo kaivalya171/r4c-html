@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff"><title>TraceGrid - Investigation Workspace</title>
+  <script>
+    try {
+      var p = new URLSearchParams(window.location.search || '');
+      var bypass = p.get('sample') === 'true' || p.get('demo') === 'sunrise' || p.get('bypass') === 'true';
+      if (!bypass && localStorage.getItem('r4c_auth_state') !== 'true') {
+        window.location.replace('./index.html');
+      }
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="cross_case.css">
+  <link rel="stylesheet" href="legal_styles.css">
+  <link rel="stylesheet" href="blockchain.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <a class="brand" href="#" aria-label="TraceGrid home"><span class="brand-mark">◎</span><span>Trace<span class="brand-light">Grid</span><small>FINANCIAL INTELLIGENCE</small></span></a>
+      <div class="case-chip" id="caseChip" style="display:inline-flex;align-items:center;gap:5px;background:#f8fafc;border:1px solid #e2e8f0;padding:2px 8px;border-radius:12px;font-size:10px;color:#475569">
+        <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 3px #10b981"></span>
+        <span style="font:8.5px var(--mono);color:#94a3b8;letter-spacing:0.5px">CASE:</span>
+        <strong id="caseLabel" style="font:10px var(--mono);color:#0f172a">No case selected</strong>
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="secure">
+        <span>●</span>
+        <div><strong>RAJSSO AUTHENTICATED</strong><small>Rajasthan Police & Cyber Cell</small></div>
+      </div>
+      <div class="profile" id="userProfileBadge" role="button" tabindex="0" style="cursor:pointer" title="Signed-in RajSSO officer">
+        <div class="avatar" id="userAvatar">IO</div>
+        <div><strong id="userName">Investigator</strong><small id="userRole">RJ-R4C-ADMIN-01</small></div>
+      </div>
+      <button type="button" id="logoutBtn" class="sso-logout-btn" title="Logout from Rajasthan SSO Session">⎋ Logout</button>
+    </div>
+    <nav id="nav">
+      <button class="nav-item active" data-page="intake"><span>▤</span> Upload & Intake</button>
+      <button class="nav-item" data-page="parser"><span>📄</span> Statement Parser</button>
+      <button class="nav-item" data-page="dashboard"><span>◫</span> Dashboard</button>
+      <button class="nav-item" data-page="transactions"><span>⇄</span> Transactions <b class="nav-counter" id="txCount">0</b></button>
+      <button class="nav-item" data-page="accounts"><span>◉</span> Accounts</button>
+      <button class="nav-item" data-page="mules"><span>⌁</span> Mule Detector <b class="nav-counter nav-alert" id="flagCount">0</b></button>
+      <button class="nav-item" data-page="trail"><span>⌘</span> Money Trail</button>
+      <button class="nav-item" data-page="blockchain" style="background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-weight:700"><span>⛓️</span> Blockchain Grid <b class="nav-new" style="background:#047857;color:#fff;padding:2px 6px;border-radius:4px;font-size:8.5px">FABRIC v3</b></button>
+      <div class="nav-divider"></div>
+      <button class="nav-item" data-page="intel"><span>◌</span> Domains & IPs</button>
+      <button class="nav-item" data-page="relationships"><span>⋈</span> Relationships</button>
+      <button class="nav-item" data-page="timeline"><span>◷</span> Timeline</button>
+      <div class="nav-divider"></div>
+      <button class="nav-item" data-page="requests"><span>↗</span> Requests</button>
+      <button class="nav-item" data-page="reports"><span>▧</span> Reports</button>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="crumb"><span>Cases</span><b>/</b><strong id="crumbTitle">Upload & Intake</strong></div><div class="top-actions"><label class="global-search"><span>⌕</span><input id="globalSearch" placeholder="Search case, UTR, account…"><kbd>⌘ K</kbd></label><button class="icon-btn" title="Notifications">♧<i></i></button><div class="top-avatar" id="topAvatar">IN</div></div></header>
+    <div class="content"><div class="synthetic-banner"><span class="banner-icon">◆</span><div><strong>SYNTHETIC DEMO DATA</strong><span>All records are fictional and for demonstration only. No live bank or external systems are connected.</span></div><button aria-label="Dismiss" id="dismissBanner">×</button></div>
+    <section id="page"></section>
+    <footer><span>TRACEGRID <b>·</b> SYNTHETIC INVESTIGATION WORKSPACE</span><span>Build 0.1.0 <b>·</b> Local demo</span></footer></div>
+  </main>
+</div>
+<div id="toast" class="toast"></div><script>window.BACKEND_API_URL = window.BACKEND_API_URL || "https://r4c-skit-ciphercrew.vercel.app";</script>
+<script src="sample_fixture.js"></script><script src="cross_case.js"></script><script src="legal_requests.js"></script><script src="blockchain.js"></script><script src="app.js?v=3"></script></body></html>
