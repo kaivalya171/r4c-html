@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff"><title>TraceGrid - Investigation Workspace</title>
+  <meta name="theme-color" content="#f1f4f7"><title>RajSSO · Rajasthan Single Sign-On — TraceGrid</title>
+  <script>
+    try {
+      if (sessionStorage.getItem('r4c_sso_session') === 'true' && localStorage.getItem('r4c_auth_state') === 'true') {
+        document.documentElement.classList.add('sso-authenticated');
+      }
+    } catch (e) {}
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
@@ -11,6 +18,122 @@
   <link rel="stylesheet" href="blockchain.css">
 </head>
 <body>
+<main id="ssoGate" class="sso-gate" aria-label="Rajasthan Single Sign-On Login">
+  <header class="sso-topbar">
+    <div class="sso-topbar-inner">
+      <div class="sso-brand-lockup">
+        <span class="brand-mark">◎</span>
+        <div>
+          <strong>Trace<span class="brand-light">Grid</span></strong>
+          <small>RAJASTHAN POLICE · R4C FINANCIAL INTELLIGENCE</small>
+        </div>
+      </div>
+      <div class="sso-topbar-badges">
+        <span class="sso-demo-pill">SYNTHETIC DEMO GATEWAY</span>
+        <span class="sso-status-pill"><span class="sso-status-dot"></span> RAJSSO 2.0</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="sso-stage">
+    <div class="sso-info-col">
+      <div class="eyebrow">SINGLE SIGN-ON AUTHENTICATION GATEWAY</div>
+      <h1>Rajasthan Cyber Crime &amp; Financial Intelligence Portal</h1>
+      <p class="sso-lead">Authorized Rajasthan Police &amp; R4C Cyber Cell workspace for complaint intake, multi-bank statement normalization, 5-rule mule detection, and UTR trail reconstruction.</p>
+
+      <ol class="sso-pillars">
+        <li>
+          <span class="sso-pillar-no">01</span>
+          <div>
+            <strong>Lawful Investigation Scope</strong>
+            <p>Case workflows, bank freezing requisitions, and Section 63 BSA 2023 certificates stay scoped to verified officer sessions.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sso-pillar-no">02</span>
+          <div>
+            <strong>Role-Tagged Audit Context</strong>
+            <p>Your RajSSO identity and badge ID populate workspace audit trails, blockchain anchors, and statutory notice headers.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sso-pillar-no">03</span>
+          <div>
+            <strong>Synthetic Demo Workspace</strong>
+            <p>Uses local and fictional statement fixtures only. Sign in with any officer SSO ID or choose a demo profile to enter.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="sso-card" role="region" aria-labelledby="ssoHeading">
+      <div class="sso-card-head">
+        <div class="sso-emblem" aria-hidden="true">RJ</div>
+        <div>
+          <span class="sso-card-kicker">RAJASTHAN SINGLE SIGN-ON</span>
+          <h2 id="ssoHeading">Sign in with RajSSO</h2>
+        </div>
+      </div>
+      <p class="sso-card-sub">Authenticate your officer SSO session before accessing the TraceGrid admin &amp; investigation panel.</p>
+
+      <div id="ssoError" class="sso-error" role="alert" hidden></div>
+
+      <form id="ssoLoginForm" class="sso-form" novalidate>
+        <div class="sso-field">
+          <label for="ssoIdInput">RajSSO ID / Official Username</label>
+          <input id="ssoIdInput" name="ssoId" type="text" autocomplete="username" placeholder="e.g. RJ-CYBER-941 or io.sharma@rajasthan.gov.in" required>
+        </div>
+
+        <div class="sso-field">
+          <div class="sso-field-row">
+            <label for="ssoPasswordInput">Password</label>
+            <span class="sso-field-hint">Demo: any 4+ chars</span>
+          </div>
+          <div class="sso-password-wrap">
+            <input id="ssoPasswordInput" name="password" type="password" autocomplete="current-password" placeholder="Enter your RajSSO password" required>
+            <button type="button" id="toggleSsoPassword" class="sso-toggle-pw" aria-label="Show password">Show</button>
+          </div>
+        </div>
+
+        <div class="sso-field">
+          <label for="ssoRoleSelect">Department Role &amp; Clearance</label>
+          <select id="ssoRoleSelect" name="role">
+            <option value="Investigating Officer (IO)">Investigating Officer (IO) · Cyber Cell</option>
+            <option value="Supervisory Admin (SHO / Nodal Officer)">Supervisory Admin (SHO / Nodal Officer)</option>
+            <option value="Cyber Forensic Officer">Cyber Forensic Officer · R4C Lab</option>
+          </select>
+        </div>
+
+        <button type="submit" id="ssoLoginBtn" class="btn btn-primary sso-submit-btn">
+          <span id="ssoLoginBtnText">Authenticate via RajSSO →</span>
+        </button>
+      </form>
+
+      <div class="sso-divider"><span>DEMO OFFICER PROFILES · CLICK TO PREFILL</span></div>
+
+      <div class="sso-demo-grid" id="ssoDemoProfiles">
+        <button type="button" class="sso-demo-btn" data-sso-id="RJ-CYBER-941" data-sso-name="IO Rajesh Sharma" data-sso-role="Investigating Officer (IO)" data-sso-unit="Cyber Crime PS, Jaipur">
+          <strong>IO Rajesh Sharma</strong>
+          <small>RJ-CYBER-941 · Investigating Officer</small>
+        </button>
+        <button type="button" class="sso-demo-btn" data-sso-id="RJ-R4C-ADMIN-01" data-sso-name="R4C Nodal Admin" data-sso-role="Supervisory Admin (SHO / Nodal Officer)" data-sso-unit="Rajasthan Cyber Command">
+          <strong>R4C Nodal Admin</strong>
+          <small>RJ-R4C-ADMIN-01 · Supervisory Admin</small>
+        </button>
+        <button type="button" class="sso-demo-btn" data-sso-id="RJ-FORENSIC-108" data-sso-name="Dr. Ananya Verma" data-sso-role="Cyber Forensic Officer" data-sso-unit="State Cyber Forensic Lab">
+          <strong>Dr. Ananya Verma</strong>
+          <small>RJ-FORENSIC-108 · Forensic Officer</small>
+        </button>
+      </div>
+      <p id="ssoPrefillNote" class="sso-prefill-note" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <footer class="sso-footer">
+    <span>RAJSSO AUTHENTICATION GATEWAY <b>·</b> TRACEGRID R4C</span>
+    <span>Synthetic demo credentials only <b>·</b> Do not enter real government passwords</span>
+  </footer>
+</main>
 <div class="shell">
   <aside class="sidebar">
     <div style="display:flex;align-items:center;gap:14px">
@@ -51,7 +174,7 @@
     </nav>
   </aside>
   <main class="main">
-    <header class="topbar"><div class="crumb"><span>Cases</span><b>/</b><strong id="crumbTitle">Upload & Intake</strong></div><div class="top-actions"><label class="global-search"><span>⌕</span><input id="globalSearch" placeholder="Search case, UTR, account…"><kbd>⌘ K</kbd></label><button class="icon-btn" title="Notifications">♧<i></i></button><div class="top-avatar">IN</div></div></header>
+    <header class="topbar"><div class="crumb"><span>Cases</span><b>/</b><strong id="crumbTitle">Upload & Intake</strong></div><div class="top-actions"><label class="global-search"><span>⌕</span><input id="globalSearch" placeholder="Search case, UTR, account…"><kbd>⌘ K</kbd></label><button class="icon-btn" title="Notifications">♧<i></i></button><div class="top-avatar" id="topAvatar">IN</div></div></header>
     <div class="content"><div class="synthetic-banner"><span class="banner-icon">◆</span><div><strong>SYNTHETIC DEMO DATA</strong><span>All records are fictional and for demonstration only. No live bank or external systems are connected.</span></div><button aria-label="Dismiss" id="dismissBanner">×</button></div>
     <section id="page"></section>
     <footer><span>TRACEGRID <b>·</b> SYNTHETIC INVESTIGATION WORKSPACE</span><span>Build 0.1.0 <b>·</b> Local demo</span></footer></div>
