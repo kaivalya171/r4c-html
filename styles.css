@@ -2082,3 +2082,33 @@ html.sso-authenticated #ssoGate {
     gap: 2px;
   }
 }
+
+.sso-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font: 10.5px var(--sans);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sso-logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+@media (max-width: 760px) {
+  .sidebar-bottom {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+  }
+}

@@ -12,7 +12,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
   <link rel="stylesheet" href="cross_case.css">
   <link rel="stylesheet" href="legal_styles.css">
   <link rel="stylesheet" href="blockchain.css">
@@ -149,11 +149,11 @@
         <span>●</span>
         <div><strong>RAJSSO AUTHENTICATED</strong><small>Rajasthan Police & Cyber Cell</small></div>
       </div>
-      <div class="profile" id="userProfileBadge" style="cursor:pointer" title="Click to logout SSO session">
+      <div class="profile" id="userProfileBadge" role="button" tabindex="0" style="cursor:pointer" title="Signed-in RajSSO officer">
         <div class="avatar" id="userAvatar">IO</div>
-        <div><strong id="userName">Investigator</strong><small id="userRole">RJ-R4C-ADMIN-01 · Logout</small></div>
-        <span class="more" style="color:#ef4444;font-weight:bold;margin-left:4px" title="Logout">⎋</span>
+        <div><strong id="userName">Investigator</strong><small id="userRole">RJ-R4C-ADMIN-01</small></div>
       </div>
+      <button type="button" id="logoutBtn" class="sso-logout-btn" title="Logout from Rajasthan SSO Session">⎋ Logout</button>
     </div>
     <nav id="nav">
       <button class="nav-item active" data-page="intake"><span>▤</span> Upload & Intake</button>
@@ -181,4 +181,4 @@
   </main>
 </div>
 <div id="toast" class="toast"></div><script>window.BACKEND_API_URL = window.BACKEND_API_URL || "https://r4c-skit-ciphercrew.vercel.app";</script>
-<script src="sample_fixture.js"></script><script src="cross_case.js"></script><script src="legal_requests.js"></script><script src="blockchain.js"></script><script src="app.js"></script></body></html>
+<script src="sample_fixture.js"></script><script src="cross_case.js"></script><script src="legal_requests.js"></script><script src="blockchain.js"></script><script src="app.js?v=2"></script></body></html>

@@ -5021,7 +5021,7 @@ function applySsoProfileToUi() {
   const avEl = document.getElementById('userAvatar');
   const topAvEl = document.getElementById('topAvatar');
   if (nameEl) nameEl.textContent = profile.name;
-  if (roleEl) roleEl.textContent = `${profile.badgeNumber || 'RJ-R4C'} · Logout`;
+  if (roleEl) roleEl.textContent = profile.badgeNumber || 'RJ-R4C';
   if (avEl) avEl.textContent = initials;
   if (topAvEl) topAvEl.textContent = initials;
   state.userName = profile.name;
@@ -5038,6 +5038,43 @@ function persistSsoSession(profile) {
   } catch (e) {}
 }
 
+function performSsoLogout() {
+  clearSsoSession();
+  urlParamsApplied = false;
+  state.page = 'intake';
+  state.case = null;
+  state.files = [];
+  state.transactions = [];
+  state.loaded = false;
+  state.selected = null;
+  state.aiAudit = null;
+  state.trailResult = null;
+  state.trailSelectedNode = null;
+  state.trailSelectedEdge = null;
+  state.userName = '';
+
+  const form = document.getElementById('ssoLoginForm');
+  form?.reset();
+  const pwInput = document.getElementById('ssoPasswordInput');
+  const togglePwBtn = document.getElementById('toggleSsoPassword');
+  if (pwInput) pwInput.type = 'password';
+  if (togglePwBtn) {
+    togglePwBtn.textContent = 'Show';
+    togglePwBtn.setAttribute('aria-label', 'Show password');
+  }
+  document.querySelectorAll('.sso-demo-btn').forEach(b => b.classList.remove('selected'));
+  const prefillNote = document.getElementById('ssoPrefillNote');
+  if (prefillNote) prefillNote.textContent = '';
+  const errorBox = document.getElementById('ssoError');
+  if (errorBox) {
+    errorBox.hidden = true;
+    errorBox.textContent = '';
+  }
+
+  showSsoGate();
+  toast('Logged out of RajSSO session');
+}
+
 function wireWorkspaceShell() {
   if (workspaceNavWired) return;
   workspaceNavWired = true;
@@ -5049,10 +5086,17 @@ function wireWorkspaceShell() {
   });
   $('#dismissBanner')?.addEventListener('click', () => $('.synthetic-banner')?.remove());
 
-  document.getElementById('userProfileBadge')?.addEventListener('click', () => {
-    if (confirm('Logout from Rajasthan SSO Session?')) {
-      clearSsoSession();
-      window.location.reload();
+  document.addEventListener('click', e => {
+    if (e.target.closest('#logoutBtn') || e.target.closest('#userProfileBadge')) {
+      e.preventDefault();
+      performSsoLogout();
+    }
+  });
+
+  document.getElementById('userProfileBadge')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      performSsoLogout();
     }
   });
 }
